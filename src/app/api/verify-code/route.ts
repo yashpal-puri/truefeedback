@@ -9,19 +9,15 @@ const usernameQuerySchema = z.object({
     username: usernameValidation
 })
 
-const verifyCodeQuerySchema = z.object({
-    verifyCode: verifysignupSchema
-})
-
 export async function GET(request: Request){
     await dbConnect();
     try {
-        const searchParams = new URL(decodeURIComponent(request.url)).searchParams;
+        const searchParams = new URL(request.url).searchParams;
         const username = searchParams.get('username');
         const verifyCode = searchParams.get('verifycode');
-
-        const result1 = usernameQuerySchema.safeParse(username);
-        const result2 = verifyCodeQuerySchema.safeParse(verifyCode);
+        
+        const result1 = usernameQuerySchema.safeParse({username});
+        const result2 = verifysignupSchema.safeParse({code:verifyCode});
 
         if(!result1.success || !result2.success){
             return Response.json({

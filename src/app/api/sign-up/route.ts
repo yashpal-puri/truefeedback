@@ -1,7 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/user.model";
 import bcrypt from "bcryptjs"
-import { sendVerificationEmail } from "@/helpers/sendVerificationEmail";
+import { sendVerificationEmail } from "@/helpers/sendNodeMailerVerificationEmail";
 
 
 export async function POST(request: Request){
@@ -37,6 +37,7 @@ export async function POST(request: Request){
                 },{status: 400})
             }
             else{
+                existingUserByEmail.username = username;
                 existingUserByEmail.verifyCode = verifyCode;
                 existingUserByEmail.verifyCodeExpiry = expiryDate;
                 existingUserByEmail.password = hashedPassword;
@@ -57,6 +58,7 @@ export async function POST(request: Request){
 
             await newUser.save();
         }
+        console.log("OTP IS " , verifyCode);
 
         const sendEmailResponse = await sendVerificationEmail(email,username,verifyCode);
         if(!sendEmailResponse.success){
@@ -70,6 +72,7 @@ export async function POST(request: Request){
             success: true,
             message: "Verification code sent successfully & is valid for one hour only - "+ sendEmailResponse.message 
         }, {status: 200})
+
 
     } catch (error) {
         console.error("Error registering the user-", error);

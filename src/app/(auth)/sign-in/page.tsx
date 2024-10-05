@@ -13,6 +13,7 @@ import { Form, FormLabel, FormItem, FormField, FormMessage, FormControl } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 
 
@@ -35,18 +36,30 @@ const Page = () => {
   const onSubmit = async (data: z.infer<typeof signinSchema>)=>{
     try {
       setisSubmitting(true);
-      const res = await axios.post<ApiResponse>('/api/sign-in', data);
-      toast({
-        title: 'Successful',
-        description: res.data.message || 'Sign-in Successful',
+      const res = await signIn('credentials',{
+        identifier : data.identifier,
+        password: data.password,
+        redirect: false,
       })
-      router.replace(`/dashboard`);
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiResponse>;      
-      console.error("Some Error in Sign-In");
+      if(res?.ok){
+        toast({
+          title: 'Successful',
+          description: 'Sign-in Successful',
+        })
+        router.replace(`/dashboard`);
+      }
+      if(!res?.ok){
+        toast({
+          title: 'Failed',
+          description: res?.error || 'Sign-in Failed',
+          variant: 'destructive'
+        })
+      }      
+    } catch (error:any) {
+      console.error("Some Error in Sign-In ", error);
       toast({
         title: 'Signin Failed',
-        description: axiosError.response?.data.message ?? "Error Signing In the user",
+        description: error?.message || "Error Signing In the user",
         variant: "destructive"
       })
     } finally {

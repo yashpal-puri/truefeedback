@@ -67,10 +67,10 @@ const VerifyAccount = () => {
             router.replace(`/sign-in`);
         } catch (error) {
             const axiosError = error as AxiosError<ApiResponse>;
-            console.error("Some Error in verifying the OTP");
+            console.error("Some Error in verifying the OTP", error);
             toast({
                 title: 'Error',
-                description: axiosError.response?.data.message ?? "Error verifying the OTP",
+                description: axiosError.response?.data.message || "Error verifying the OTP",
                 variant: "destructive"
             })
         } finally {
